@@ -28,20 +28,21 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { icons } from "../../utils/icons";
+import { locationStore } from "../../store/locationDetails";
 
 interface LocationSuggestion {
-  name: string;
+  name?: string;
   lat: number;
   lon: number;
-  state?: string;
+  state: string;
   country: string;
 }
 
 const router = useRouter();
 
-const emit = defineEmits<{
-  (e: "select", location: LocationSuggestion): void;
-}>();
+// const emit = defineEmits<{
+//   (e: "select", location: LocationSuggestion): void;
+// }>();
 
 const query = ref("");
 const suggestions = ref<LocationSuggestion[]>([]);
@@ -82,9 +83,10 @@ const fetchSuggestions = async (input: string) => {
 };
 
 const selectSuggestion = (location: LocationSuggestion) => {
-  emit("select", location);
+  // emit("select", location);
   query.value = formatLocation(location);
   showDropdown.value = false;
+  locationStore.setLocation(location);
   console.log(location);
 
   router.push({ name: "weather-detail", params: { state: location.state } });

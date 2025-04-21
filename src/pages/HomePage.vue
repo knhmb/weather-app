@@ -1,12 +1,16 @@
 <template>
   <main-layout>
-    <div class="header">
+    <LoadingSpinner v-if="isLoading" />
+    <div class="header" v-if="!isLoading">
       <h1>Weather</h1>
-      <img :src="icons.User" alt="User Icon" />
+      <img
+        @click="router.push('/edit-profile')"
+        :src="icons.User"
+        alt="User Icon"
+      />
     </div>
     <SearchForm />
-    <LoadingSpinner v-if="isLoading" />
-    <template v-if="locationStore.locations.length > 0 && !isLoading">
+    <template v-if="locationStore.locations.length > 0">
       <WeatherCard
         v-for="item in locationStore.locations"
         :key="item.id"
@@ -37,6 +41,7 @@ import SearchForm from "../components/molecules/SearchForm.vue";
 import WeatherCard from "../components/atoms/WeatherCard.vue";
 import LoadingSpinner from "../components/ui/LoadingSpinner.vue";
 
+const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const router = useRouter();
 const isLoading = ref(false);
 
@@ -65,10 +70,9 @@ onMounted(() => {
     if (locationStore.locations.length === 0) {
       navigator.geolocation.getCurrentPosition(async (position) => {
         const { latitude, longitude } = position.coords;
-        const result = await fetchWeatherByCoords({
-          lat: latitude,
-          lon: longitude,
-        });
+        const result = await fetchWeatherByCoords(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${API_KEY}`
+        );
 
         if (result) {
           locationStore.setLocations(result, true);

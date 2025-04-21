@@ -1,10 +1,14 @@
 import type { WeatherParams } from "../types/weather";
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 
-export const fetchWeatherByCoords = async (query: WeatherParams) => {
+export const fetchWeatherByCoords = async (
+  // query: WeatherParams,
+  url: string
+) => {
   try {
     const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${query.lat}&lon=${query.lon}&units=metric&appid=${API_KEY}`
+      url
+      // `https://api.openweathermap.org/data/2.5/weather?lat=${query.lat}&lon=${query.lon}&units=metric&appid=${API_KEY}`
     );
     if (!response.ok) throw new Error("Weather fetch failed");
     const data = await response.json();

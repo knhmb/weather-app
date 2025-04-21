@@ -112,10 +112,9 @@ const fetchData = async () => {
 
   isLoading.value = true;
   try {
-    const result = await fetchWeatherByCoords({
-      lat: locationDetails.lat,
-      lon: locationDetails.lon,
-    });
+    const result = await fetchWeatherByCoords(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${locationDetails.lat}&lon=${locationDetails.lon}&units=metric&appid=${API_KEY}`
+    );
 
     if (!result) throw new Error("Failed to fetch location data");
 
@@ -129,14 +128,14 @@ const fetchData = async () => {
     });
 
     // 2. Fetch hourly forecasts using updated location
-    const response = await fetch(
+    const response = await fetchWeatherByCoords(
       `https://api.openweathermap.org/data/3.0/onecall?lat=${locationDetails.lat}&lon=${locationDetails.lon}&exclude=minutely,current,alerts&units=metric&appid=${API_KEY}`
     );
 
-    if (!response.ok) throw new Error("Hourly forecast request failed");
+    // if (!response.ok) throw new Error("Hourly forecast request failed");
 
-    const data = await response.json();
-    allLocationData.value = data;
+    // const data = await response.json();
+    allLocationData.value = response;
   } catch (err) {
     console.error("Error fetching weather data:", err);
   } finally {

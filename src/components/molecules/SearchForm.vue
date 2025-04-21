@@ -29,6 +29,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { icons } from "../../utils/icons";
 import { locationStore } from "../../store/locationDetails";
+import { fetchWeatherByCoords } from "../../store/weather";
 
 interface LocationSuggestion {
   name?: string;
@@ -69,13 +70,12 @@ const handleInput = (event: Event) => {
 
 const fetchSuggestions = async (input: string) => {
   try {
-    const res = await fetch(
+    const res = await fetchWeatherByCoords(
       `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(
         input
       )}&limit=5&appid=${API_KEY}`
     );
-    const data = await res.json();
-    suggestions.value = data;
+    suggestions.value = res;
     showDropdown.value = true;
   } catch (err) {
     console.error("Failed to fetch suggestions", err);

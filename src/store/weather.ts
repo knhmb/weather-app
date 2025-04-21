@@ -8,6 +8,7 @@ export const fetchWeatherByCoords = async (query: WeatherParams) => {
     );
     if (!response.ok) throw new Error("Weather fetch failed");
     const data = await response.json();
+
     return data;
   } catch (err) {
     console.error(err);

@@ -10,8 +10,14 @@ interface LocationDetails {
 const stored = localStorage.getItem("locations");
 const initialLocations = stored ? JSON.parse(stored) : [];
 
+const storedLocationDetails = localStorage.getItem("storedLocationDetails");
+const dataStored = storedLocationDetails
+  ? JSON.parse(storedLocationDetails)
+  : [];
+
 export const locationStore = reactive({
-  locationDetails: null as LocationDetails | null,
+  // locationDetails: null as LocationDetails | null,
+  locationDetails: dataStored,
   locations: initialLocations,
 
   setLocation(details: LocationDetails) {
@@ -22,6 +28,10 @@ export const locationStore = reactive({
     const exists = this.locations.some((loc: any) => loc.id === location.id);
     if (!exists) this.locations.push({ ...location, isMyLocation });
   },
+
+  deleteLocation(id: number) {
+    this.locations = this.locations.filter((loc: any) => loc.id !== id);
+  },
 });
 
 // auto save on update
@@ -29,6 +39,14 @@ watch(
   () => locationStore.locations,
   (newVal) => {
     localStorage.setItem("locations", JSON.stringify(newVal));
+  },
+  { deep: true }
+);
+
+watch(
+  () => locationStore.locationDetails,
+  (newVal) => {
+    localStorage.setItem("storedLocationDetails", JSON.stringify(newVal));
   },
   { deep: true }
 );

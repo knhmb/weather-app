@@ -4,9 +4,9 @@
       <h1>Weather</h1>
       <img :src="icons.User" alt="User Icon" />
     </div>
-    <!-- <SearchForm @select="fetchLocation" /> -->
     <SearchForm />
-    <template v-if="locationStore.locations.length > 0">
+    <LoadingSpinner v-if="isLoading" />
+    <template v-if="locationStore.locations.length > 0 && !isLoading">
       <WeatherCard
         v-for="item in locationStore.locations"
         :key="item.id"
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { fetchWeatherByCoords } from "../store/weather";
 import { locationStore } from "../store/locationDetails";
@@ -35,16 +35,15 @@ import { icons } from "../utils/icons";
 import MainLayout from "../components/templates/MainLayout.vue";
 import SearchForm from "../components/molecules/SearchForm.vue";
 import WeatherCard from "../components/atoms/WeatherCard.vue";
+import LoadingSpinner from "../components/ui/LoadingSpinner.vue";
 
 const router = useRouter();
+const isLoading = ref(false);
 
 const selectLocation = (id: number) => {
-  console.log(id);
-
   const selectedLocation = locationStore.locations.find(
     (loc: any) => loc.id === id
   );
-  console.log(selectedLocation);
 
   locationStore.setLocation({
     state: selectedLocation.name,
@@ -52,7 +51,6 @@ const selectLocation = (id: number) => {
     lat: selectedLocation.coord.lat,
     lon: selectedLocation.coord.lon,
   });
-  console.log(locationStore.locationDetails);
 
   router.push({
     name: "weather-detail",
@@ -60,26 +58,27 @@ const selectLocation = (id: number) => {
   });
 };
 
-// const fetchLocation = async (location: any) => {
-//   const result = await fetchWeatherByCoords({
-//     lat: location.lat,
-//     lon: location.lon,
-//   });
-//   // if (result) localStorage.setItem("locationDetails", JSON.stringify(location));
-//   if (result) locationStore.setLocation(result);
-//   console.log(result);
-// };
-
 onMounted(() => {
-  if (locationStore.locations.length === 0) {
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-      const result = await fetchWeatherByCoords({
-        lat: latitude,
-        lon: longitude,
+  isLoading.value = true;
+
+  try {
+    if (locationStore.locations.length === 0) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        const result = await fetchWeatherByCoords({
+          lat: latitude,
+          lon: longitude,
+        });
+
+        if (result) {
+          locationStore.setLocations(result, true);
+        }
       });
-      if (result) locationStore.setLocations(result, true);
-    });
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isLoading.value = false;
   }
 });
 </script>

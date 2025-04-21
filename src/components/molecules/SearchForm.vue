@@ -83,11 +83,9 @@ const fetchSuggestions = async (input: string) => {
 };
 
 const selectSuggestion = (location: LocationSuggestion) => {
-  // emit("select", location);
   query.value = formatLocation(location);
   showDropdown.value = false;
   locationStore.setLocation(location);
-  console.log(location);
 
   router.push({ name: "weather-detail", params: { state: location.state } });
 };

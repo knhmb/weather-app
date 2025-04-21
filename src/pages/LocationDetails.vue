@@ -1,15 +1,21 @@
 <template>
   <section class="top-section">
-    <main-layout>
+    <Notification
+      @close-notification="closeNotification"
+      :is-clicked="isClicked"
+      :is-initial="isInitial"
+    />
+    <LoadingSpinner v-if="isLoading" />
+    <main-layout v-else>
       <div class="header">
         <img
           @click="router.go(-1)"
           :src="icons.ChevronLeft"
           alt="Chevron Left"
         />
-        <p v-if="locationDetails">
-          {{ locationDetails.state }},
-          {{ locationDetails.country }}
+        <p v-if="location">
+          {{ location.name }},
+          {{ location.sys?.country }}
         </p>
         <img
           v-if="!isLocationSaved"
@@ -19,7 +25,7 @@
         />
         <img
           v-else
-          @click="addLocation"
+          @click="deleteLocation"
           :src="icons.DeleteIcon"
           alt="Delete Icon"
         />
@@ -41,8 +47,10 @@
       </div>
     </main-layout>
   </section>
-  <HourlyForecast :location-data="allLocationData" />
-  <WeeklyForecast :location-data="allLocationData" />
+  <template v-if="!isLoading">
+    <HourlyForecast :location-data="allLocationData" />
+    <WeeklyForecast :location-data="allLocationData" />
+  </template>
 </template>
 
 <script lang="ts" setup>
@@ -54,15 +62,17 @@ import MainLayout from "../components/templates/MainLayout.vue";
 import { fetchWeatherByCoords } from "../store/weather";
 import HourlyForecast from "../components/location-details/HourlyForecast.vue";
 import WeeklyForecast from "../components/location-details/WeeklyForecast.vue";
+import Notification from "../components/ui/Notification.vue";
+import LoadingSpinner from "../components/ui/LoadingSpinner.vue";
 
-// const locationDetails = JSON.parse(
-//   localStorage.getItem("locationDetails") || "{}"
-// );
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const router = useRouter();
 const location = ref<any>({});
 const allLocationData = ref([]);
+const isClicked = ref(false);
 const lastUpdate = ref("");
+const isLoading = ref(false);
+const isInitial = ref(true);
 const locationDetails = locationStore.locationDetails;
 const date = new Date();
 
@@ -81,14 +91,27 @@ const isLocationSaved = computed(() => {
 
 const addLocation = () => {
   locationStore.setLocations(location.value);
-  console.log(location.value);
+  isClicked.value = true;
+  isInitial.value = false;
+  setTimeout(() => {
+    isClicked.value = false;
+  }, 3000);
+};
+
+const deleteLocation = () => {
+  locationStore.deleteLocation(location.value.id);
+  router.replace("/");
+};
+
+const closeNotification = () => {
+  isClicked.value = false;
 };
 
 const fetchData = async () => {
   if (!locationDetails) return;
 
+  isLoading.value = true;
   try {
-    // 1. Fetch weather location
     const result = await fetchWeatherByCoords({
       lat: locationDetails.lat,
       lon: locationDetails.lon,
@@ -114,33 +137,12 @@ const fetchData = async () => {
 
     const data = await response.json();
     allLocationData.value = data;
-    console.log("Hourly Forecast:", data);
   } catch (err) {
     console.error("Error fetching weather data:", err);
+  } finally {
+    isLoading.value = false;
   }
-
-  console.log("Current Location:", location.value);
 };
-
-// const fetchData = async () => {
-//   if (!locationDetails) return;
-
-//   const result = await fetchWeatherByCoords({
-//     lat: locationDetails?.lat,
-//     lon: locationDetails?.lon,
-//   });
-
-//   if (result) {
-//     location.value = result;
-
-//     lastUpdate.value = new Date().toLocaleTimeString("en-US", {
-//       hour: "numeric",
-//       minute: "2-digit",
-//       hour12: true,
-//     });
-//   }
-//   console.log(location.value);
-// };
 
 onMounted(async () => {
   await fetchData();
@@ -150,8 +152,9 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .top-section {
   background: linear-gradient(#4f80fa, #3764d7, #335fd1);
-  height: 40%;
+  min-height: 45vh;
   color: #fff;
+  position: relative;
 
   .header {
     display: flex;

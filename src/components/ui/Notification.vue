@@ -12,8 +12,6 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmits } from "vue";
-
 defineProps<{ isClicked: boolean; isInitial: boolean }>();
 const emits = defineEmits(["close-notification"]);
 </script>

@@ -1,23 +1,20 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomePage from "../pages/HomePage.vue";
-import LocationDetails from "../pages/LocationDetails.vue";
-import EditProfile from "../pages/EditProfile.vue";
 
 const routes = [
   {
     path: "/",
     name: "home",
-    component: HomePage,
+    component: () => import("../pages/HomePage.vue"),
   },
   {
     path: "/weather-detail/:state",
     name: "weather-detail",
-    component: LocationDetails,
+    component: () => import("../pages/LocationDetails.vue"),
   },
   {
     path: "/edit-profile",
     name: "edit-profile",
-    component: EditProfile,
+    component: () => import("../pages/EditProfile.vue"),
   },
 ];
 

@@ -41,10 +41,6 @@ interface LocationSuggestion {
 
 const router = useRouter();
 
-// const emit = defineEmits<{
-//   (e: "select", location: LocationSuggestion): void;
-// }>();
-
 const query = ref("");
 const suggestions = ref<LocationSuggestion[]>([]);
 const showDropdown = ref(false);

@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineEmits } from "vue";
+import { computed } from "vue";
 import { images } from "../../utils/icons";
 import { formatTime } from "../../utils/format";
 
